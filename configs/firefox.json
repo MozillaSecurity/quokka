@@ -1,0 +1,9 @@
+{
+  "plugin": "firefox.FirefoxApplication",
+  "binary": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
+  "params": "-no-remote -height 512 -width 512 @params@",
+  "prefs": "/Users/cdiehl/Dropbox/Projects/peach/peach/Resources/Settings/Firefox/prefs.js",
+  "environ": {
+    "DYLD_LIBRARY_PATH": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
+  }
+}
