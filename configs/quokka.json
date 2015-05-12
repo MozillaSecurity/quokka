@@ -7,32 +7,29 @@
       "check_malloc_usable_size": 0,
       "alloc_dealloc_mismatch": 0
     },
-    "ASAN_SYMBOLIZE": "/Users/cdiehl/Documents/repos/llvm/r233758/build/bin/llvm-symbolizer"
+    "ASAN_SYMBOLIZE": "/srv/repos/llvm/r233758/build/bin/llvm-symbolizer"
   },
-  "monitors": [
-    [
-      "console.ConsoleMonitor", [
-        "sanitizer.ASanListener",
-        "testcase.TestcaseListener"
-      ]
-    ]
-  ],
   "loggers": [
-    [
-      "filesystem.FileLogger", {
-        "path": "/Users/cdiehl/Desktop"
+    {
+      "class": "filesystem.FileLogger",
+      "kargs": {
+        "path": "/srv/logs"
       }
-    ]
+    }
   ],
   "monitors": [
     {
       "class": "console.ConsoleMonitor",
-      "options": {
-        "x":"y"
-      },
+      "kargs": {},
       "listeners": [
-        "sanitizer.ASanListener",
-        "testcase.TestcaseListener"
+        {
+          "class": "sanitizer.ASanListener",
+          "kargs": {}
+        },
+        {
+          "class": "testcase.TestcaseListener",
+          "kargs": {}
+        }
       ]
     }
   ]

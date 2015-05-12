@@ -138,33 +138,19 @@ class Quokka(object):
         pass
 
     def run_plugin(self):
-        # Plugin
         try:
-            plugin_class = ModuleImporter('core.plugins.' + self.conf.plugin_path).klass()
+            plugin_class = ModuleImporter('core.plugins.' + self.conf.plugin_class).klass()
         except PluginException as msg:
             raise QuokkaException("Plugin initialization failed: %s" % msg)
-        plugin_settings = self.conf.plugin.get("configuration")
-        plugin = plugin_class(plugin_settings)
+
+        plugin = plugin_class(self.conf)
         try:
             plugin.start()
         except PluginException as msg:
             raise QuokkaException(msg)
 
-        # Monitors and Listeners
-        monitors = self.conf.plugin.get("monitors")
-        if not monitors:
-            monitors = self.conf.quokka.get("monitors")
-            if not monitors:
-                raise QuokkaException("No monitors to attach.")
-        self.attach_monitors(plugin, monitors)
-
-        # Loggers
-        loggers = self.conf.plugin.get("loggers")
-        if not loggers:
-            loggers = self.conf.quokka.get("loggers")
-            if not loggers:
-                raise QuokkaException("No loggers to attach.")
-        self.attach_loggers(loggers)
+        self.attach_monitors(plugin, self.conf.monitors)
+        self.attach_loggers(self.conf.loggers)
 
         plugin.process.wait()
 
@@ -174,29 +160,34 @@ class Quokka(object):
 
     def attach_monitors(self, plugin, monitors):
         for monitor in monitors:
-            monitor_path = monitor[0]
-            logging.info("Attaching monitor '%s'" % monitor_path)
-            monitor_class = ModuleImporter('core.monitors.' + monitor_path).klass()
+            monitor_class = monitor.get("class")
+            monitor_kargs = monitor.get("kargs")
+            monitor_listeners = monitor.get("listeners")
+            logging.info("Attaching monitor '%s'" % monitor_class)
+            monitor_class = ModuleImporter('core.monitors.' + monitor_class).klass()
             if monitor_class.MONITOR_NAME == "ConsoleMonitor":
-                monitor_instance = monitor_class(plugin.process)
+                monitor_instance = monitor_class(plugin.process, *monitor_kargs)
             elif monitor_class.MONITOR_NAME == "WebSocketMonitor":
                 pass
             else:
                 logging.warning("Dropping %s" % monitor_path)
                 continue
-            for listener_path in monitor[1]:
-                logging.info("Attaching listener '%s'" % listener_path)
-                listener_class = ModuleImporter('core.listeners.' + listener_path).klass()
-                monitor_instance.add_listener(listener_class())
-
+            for listener in monitor_listeners:
+                listener_class = listener.get("class")
+                listener_kargs = listener.get("kargs")
+                logging.info("Attaching listener '%s'" % listener_class)
+                listener_class = ModuleImporter('core.listeners.' + listener_class).klass()
+                listener_instance = listener_class(*listener_kargs)
+                monitor_instance.add_listener(listener_instance)
             monitor_instance.daemon = True
             monitor_instance.start()
             self.monitors.append(monitor_instance)
 
     def attach_loggers(self, loggers):
         for logger in loggers:
-            logger_path, logger_settings = logger[0], logger[1]
-            logging.info("Attaching logger '%s'" % logger_path)
-            logger_class = ModuleImporter('core.loggers.' + logger_path).klass()
-            logger = logger_class(**logger_settings)
+            logger_class = logger.get("class")
+            logger_kargs = logger.get("kargs")
+            logging.info("Attaching logger '%s'" % logger_class)
+            logger_class = ModuleImporter('core.loggers.' + logger_class).klass()
+            logger = logger_class(**logger_kargs)
             self.loggers.append(logger)

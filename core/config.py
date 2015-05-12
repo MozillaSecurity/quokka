@@ -77,7 +77,7 @@ class QuokkaConf(object):
             raise QuokkaException('Unable to parse plugin configuration: %s' % msg)
         self.plugin = AttributeTree(conf)
         logging.info('Merging plugin configuration with Quokka.')
-        self.quokka = self.merge(self.quokka, self.plugin)
+        self.quokka = self.merge(self.plugin, self.quokka)
 
     @staticmethod
     def merge(x, y):
@@ -106,8 +106,36 @@ class QuokkaConf(object):
         return re.findall("@(.*?)@", conf)
 
     @property
-    def plugin_path(self):
-        plugin_path = self.plugin.get("plugin")
-        if not plugin_path:
-            raise QuokkaException("Missing plugin path.")
-        return plugin_path
+    def monitors(self):
+        monitors = self.quokka.get("monitors")
+        if not monitors:
+            raise QuokkaException("No monitors to attach.")
+        return monitors
+
+    @property
+    def loggers(self):
+        loggers = self.quokka.get("loggers")
+        if not loggers:
+            raise QuokkaException("No loggers to attach.")
+        return loggers
+
+    @property
+    def plugin_root(self):
+        plugin_root = self.quokka.get("plugin")
+        if not plugin_root:
+            raise QuokkaException("Malformed plugin structure.")
+        return plugin_root
+
+    @property
+    def plugin_class(self):
+        plugin_class = self.plugin_root.get("class")
+        if not plugin_class:
+            raise QuokkaException("Plugin class is not defined.")
+        return plugin_class
+
+    @property
+    def plugin_kargs(self):
+        plugin_kargs = self.plugin_root.get("kargs")
+        if not plugin_kargs:
+            raise QuokkaException("Plugin kargs is not defined.")
+        return plugin_kargs

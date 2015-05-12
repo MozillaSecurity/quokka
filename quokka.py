@@ -97,7 +97,7 @@ class QuokkaCommandLine(object):
                 return 1
 
         if args.conf_args:
-            logging.info('Updating configuration.')
+            logging.info('Updating configuration on request.')
             conf_args = self._pair_to_dict(args.conf_args)
             for k, v in conf_args.items():
                 if k in quokka_conf.quokka:

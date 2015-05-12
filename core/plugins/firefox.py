@@ -15,18 +15,19 @@ class FirefoxApplication(ExternalProcess):
 
     def __init__(self, conf):
         super(FirefoxApplication, self).__init__()
-        self.conf = conf
+        self.quokka = conf.quokka
+        self.plugin = conf.plugin_kargs
         self.profile_path = ''
 
     def start(self):
-        binary = self.conf['binary']
+        binary = self.plugin['binary']
         if not binary or not os.path.exists(binary):
             raise PluginException('%s not found.' % binary)
 
-        params = self.conf['params']
-        environ = self.set_environ(self.conf['environ'])
+        params = self.plugin['params']
+        environ = self.set_environ(self.quokka['environ'])
 
-        prefs = self.conf['prefs']
+        prefs = self.plugin['prefs']
         if not prefs or not os.path.exists(prefs):
             raise PluginException('No preferences provided.')
 
