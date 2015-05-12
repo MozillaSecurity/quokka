@@ -4,8 +4,7 @@ Quokka
 <h3>Setup</h3>
 ```
 pip install -r requirements.txt
-
-
+```
 
 <h3>Basic Usage Examples</h3>
 Launch an application with a plugin class and plugin configuration.
