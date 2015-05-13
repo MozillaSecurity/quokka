@@ -4,7 +4,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import re
 import json
-import types
 import logging
 
 from .quokka import QuokkaException
@@ -81,12 +80,10 @@ class QuokkaConf(object):
 
     @staticmethod
     def merge(x, y):
-        # Store a copy of x, but overwrite with y's values where applicable.
-        merged = dict(x, **y)
+        merged = dict(x, **y)  # a copy of |x| but overwrite with |y|'s values where applicable.
         xkeys = x.keys()
         # If the value of merged[key] was overwritten with y[key]'s value, we put back any missing x[key] values.
         for key in xkeys:
-            # If this key is a dictionary, recurse
             if isinstance(x[key], dict) and key in y:
                 merged[key] = QuokkaConf.merge(x[key], y[key])
         return merged

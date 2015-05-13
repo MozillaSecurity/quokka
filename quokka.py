@@ -11,8 +11,8 @@ import sys
 import logging
 import argparse
 
-from core.quokka import Quokka, QuokkaException
-from core.config import QuokkaConf, AttributeTree
+from core.quokka import Quokka, Utilities, QuokkaException
+from core.config import QuokkaConf
 
 
 class QuokkaCommandLine(object):
@@ -50,9 +50,6 @@ class QuokkaCommandLine(object):
 
         return parser.parse_args()
 
-    def _pair_to_dict(self, args):
-        return dict(kv.split('=', 1) for kv in args)
-
     def main(self):
         args = self.parse_args()
 
@@ -79,7 +76,7 @@ class QuokkaCommandLine(object):
         try:
             quokka_conf = args.quokka.read()
             if args.conf_vars:
-                quokka_conf = QuokkaConf.set_conf_vars(quokka_conf, self._pair_to_dict(args.conf_vars))
+                quokka_conf = QuokkaConf.set_conf_vars(quokka_conf, Utilities.pair_to_dict(args.conf_vars))
             quokka_conf = QuokkaConf(quokka_conf)
         except QuokkaException as msg:
             logging.error(msg)
@@ -90,7 +87,7 @@ class QuokkaCommandLine(object):
             try:
                 plugin_conf = args.plugin.read()
                 if args.conf_vars:
-                    plugin_conf = QuokkaConf.set_conf_vars(plugin_conf, self._pair_to_dict(args.conf_vars))
+                    plugin_conf = QuokkaConf.set_conf_vars(plugin_conf, Utilities.pair_to_dict(args.conf_vars))
                 quokka_conf.add_plugin_conf(plugin_conf)
             except QuokkaException as msg:
                 logging.error(msg)
@@ -98,19 +95,35 @@ class QuokkaCommandLine(object):
 
         if args.conf_args:
             logging.info('Updating configuration on request.')
-            conf_args = self._pair_to_dict(args.conf_args)
+            conf_args = Utilities.pair_to_dict(args.conf_args)
             for k, v in conf_args.items():
                 if k in quokka_conf.quokka:
+                    print(k)
                     quokka_conf.quokka[k] = v
 
-        quokka = Quokka(quokka_conf)
-        try:
-            quokka.run_plugin()
-        except QuokkaException as msg:
-            logging.error(msg)
-        except KeyboardInterrupt:
-            logging.info("Caught SIGINT, aborting...")
-            return 0
+        if args.command:
+            try:
+                quokka = Quokka(quokka_conf)
+                quokka.run_command(args.command)
+            except QuokkaException as msg:
+                logging.error(msg)
+                return 1
+            except KeyboardInterrupt:
+                print('')
+                logging.info("Caught SIGINT, aborting...")
+                return 0
+
+        if args.plugin:
+            try:
+                quokka = Quokka(quokka_conf)
+                quokka.run_plugin()
+            except QuokkaException as msg:
+                logging.error(msg)
+                return 1
+            except KeyboardInterrupt:
+                print('')
+                logging.info("Caught SIGINT, aborting...")
+                return 0
 
         return 0
 

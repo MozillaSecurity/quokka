@@ -16,4 +16,3 @@ class ConsoleMonitor(Monitor):
         for line in iter(self.out.readline, ''):
             self.line_queue.put(line)
         self.out.close()
-

@@ -18,8 +18,8 @@ class TestcaseListener(Listener):
     def process_line(self, line):
         if line.find('NEXT TESTCASE') != -1:
             self.testcase = []
-        if line.startswith('/*L*/'):
         #if line.find("/*L*/") != -1: # For Chromium
+        if line.startswith('/*L*/'):
             self.testcase.append(json.loads(line[5:]))
 
     def detected_fault(self):

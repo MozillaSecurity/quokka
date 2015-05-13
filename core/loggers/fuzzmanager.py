@@ -75,4 +75,3 @@ try:
                 collector.submit(crash_info, testcase.name, metaData=None)
 except Exception:
     logging.error("FuzzManager is deactivated!")
-

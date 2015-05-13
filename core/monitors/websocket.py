@@ -46,5 +46,3 @@ class WebSocketMonitor(Monitor):
                 self.server.shutdown()
             except Exception as e:
                 logging.exception(e)
-
-

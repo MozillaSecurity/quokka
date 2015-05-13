@@ -100,7 +100,7 @@ class ExternalProcess(BasePlugin):
             return env
         for key, val in context.items():
             if isinstance(val, dict):
-                env[key] = ' '.join('{!s}={!r}'.format(k, v) for (k, v) in val.items())
+                env[key] = ','.join('{!s}={!r}'.format(k, v) for (k, v) in val.items())
             else:
                 env[key] = val
         return env
@@ -114,6 +114,13 @@ class ExternalProcess(BasePlugin):
                 logging.error(e)
 
 
+class Utilities(object):
+
+    @staticmethod
+    def pair_to_dict(args):
+        return dict(kv.split('=', 1) for kv in args)
+
+
 class Quokka(object):
     """
     Quokka.
@@ -125,7 +132,8 @@ class Quokka(object):
         self.loggers = []
 
     def detect_faults(self):
-        """Observe each attached monitor for faults and add each fault to the attached loggers."""
+        """Observe each attached monitor for faults and add each fault to the attached loggers.
+        """
         for monitor in self.monitors:
             if monitor.detected_fault():
                 monitor_data = monitor.get_data()
@@ -134,10 +142,28 @@ class Quokka(object):
         for logger in self.loggers:
             logger.add_fault()
 
-    def run_command(self):
-        pass
+    def run_command(self, cmd):
+        """Run a provided command as a sub-process.
+        """
+        if isinstance(cmd, str):
+            import shlex
+            cmd = shlex.split(cmd)
+
+        app = ExternalProcess()
+        app.open(cmd, app.set_environ(self.conf.quokka.get("environ")))
+
+        self.attach_monitors(app, self.conf.monitors)
+        self.attach_loggers(self.conf.loggers)
+
+        app.process.wait()
+
+        self.detect_faults()
+
+        return app.process.returncode
 
     def run_plugin(self):
+        """Run a program which needs more complex setup steps as a sub-process.
+        """
         try:
             plugin_class = ModuleImporter('core.plugins.' + self.conf.plugin_class).klass()
         except PluginException as msg:
@@ -170,7 +196,7 @@ class Quokka(object):
             elif monitor_class.MONITOR_NAME == "WebSocketMonitor":
                 pass
             else:
-                logging.warning("Dropping %s" % monitor_path)
+                logging.warning("Dropping %s" % monitor_class)
                 continue
             for listener in monitor_listeners:
                 listener_class = listener.get("class")

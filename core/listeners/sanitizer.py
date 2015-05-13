@@ -56,4 +56,3 @@ class SyzyListener(Listener):
                 'data': os.linesep.join(self.crashlog),
                 'name': 'crashlog.txt'
             }
-
