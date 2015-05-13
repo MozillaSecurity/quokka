@@ -1,12 +1,13 @@
 Quokka
 ======
 
-<h3>Setup</h3>
-```
-pip install -r requirements.txt
-```
+<h3>Requirements</h3>
+---
+None
+
 
 <h3>Basic Usage Examples</h3>
+---
 Launch an application with a plugin class and plugin configuration.
 ```
 ./quokka.py -plugin configs/firefox.json
@@ -27,6 +28,7 @@ Further it is possible to edit nested configuration values by using the dot-nota
 
 
 <h3>Help Menu</h3>
+---
 ```
 usage: ./quokka.py (-command str | -plugin file) [-quokka file]
                    [-conf-args k=v [k=v ...]] [-conf-vars k=v [k=v ...]]
