@@ -100,6 +100,8 @@ class QuokkaCommandLine(object):
                 if k in quokka_conf.quokka:
                     quokka_conf.quokka[k] = v
 
+        logging.debug(quokka_conf.quokka)
+
         if args.command:
             try:
                 quokka = Quokka(quokka_conf)

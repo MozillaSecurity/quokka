@@ -1,0 +1,9 @@
+{
+  "plugin": {
+    "class": "command.ConsoleApplication",
+    "kargs": {
+      "binary": "",
+      "params": ""
+    }
+  }
+}
