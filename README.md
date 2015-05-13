@@ -25,6 +25,9 @@ Further it is possible to edit nested configuration values by using the dot-nota
 ./quokka.py -plugin configs/firefox.json -conf-vars params=google.com -conf-args environ.ASAN_OPTIONS.strict_init_order=1
 ```
 
+```
+./quokka.py -plugin configs/command.json -conf-args plugin.kargs.binary=/sbin/ping plugin.kargs.params="-c 10 google.com"
+```
 
 
 <h3>Help Menu</h3>
