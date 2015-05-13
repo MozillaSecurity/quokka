@@ -16,7 +16,6 @@ class ConsoleApplication(ExternalProcess):
 
     def start(self):
         binary = self.plugin['binary']
-        print(binary)
         if not binary or not os.path.exists(binary):
             raise PluginException('%s not found.' % binary)
 
