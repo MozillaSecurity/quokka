@@ -76,7 +76,7 @@ class QuokkaConf(object):
             raise QuokkaException('Unable to parse plugin configuration: %s' % msg)
         self.plugin = AttributeTree(conf)
         logging.info('Merging plugin configuration with Quokka.')
-        self.quokka = self.merge(self.plugin, self.quokka)
+        self.quokka = AttributeTree(self.merge(self.plugin, self.quokka))
 
     @staticmethod
     def merge(x, y):

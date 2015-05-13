@@ -98,7 +98,6 @@ class QuokkaCommandLine(object):
             conf_args = Utilities.pair_to_dict(args.conf_args)
             for k, v in conf_args.items():
                 if k in quokka_conf.quokka:
-                    print(k)
                     quokka_conf.quokka[k] = v
 
         if args.command:
