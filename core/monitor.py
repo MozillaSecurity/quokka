@@ -13,7 +13,14 @@ except ImportError as e:
 
 class MonitorException(Exception):
     """
-    Unrecoverable error in external process.
+    Unrecoverable error in attached monitor.
+    """
+    pass
+
+
+class ListenerException(Exception):
+    """
+    Unrecoverable error in attached listener.
     """
     pass
 

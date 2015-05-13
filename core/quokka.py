@@ -9,16 +9,16 @@ import logging
 import subprocess
 
 
-class PluginException(Exception):
+class QuokkaException(Exception):
     """
-    Unrecoverable error in external process.
+    Unrecoverable error in Quokka.
     """
     pass
 
 
-class QuokkaException(Exception):
+class PluginException(Exception):
     """
-    Unrecoverable error in Quokka.
+    Unrecoverable error in external process.
     """
     pass
 
@@ -105,6 +105,13 @@ class ExternalProcess(BasePlugin):
                 env[key] = val
         return env
 
+    def is_running(self):
+        if self.process is None:
+            return False
+        if self.process.poll() is not None:
+            return False
+        return True
+
     def stop(self):
         if self.process:
             try:
@@ -130,36 +137,7 @@ class Quokka(object):
         self.conf = conf
         self.monitors = []
         self.loggers = []
-
-    def detect_faults(self):
-        """Observe each attached monitor for faults and add each fault to the attached loggers.
-        """
-        for monitor in self.monitors:
-            if monitor.detected_fault():
-                monitor_data = monitor.get_data()
-                for logger in self.loggers:
-                    logger.add_to_bucket(monitor_data)
-        for logger in self.loggers:
-            logger.add_fault()
-
-    def run_command(self, cmd):
-        """Run a provided command as a sub-process.
-        """
-        if isinstance(cmd, str):
-            import shlex
-            cmd = shlex.split(cmd)
-
-        app = ExternalProcess()
-        app.open(cmd, app.set_environ(self.conf.quokka.get("environ")))
-
-        self.attach_monitors(app, self.conf.monitors)
-        self.attach_loggers(self.conf.loggers)
-
-        app.process.wait()
-
-        self.detect_faults()
-
-        return app.process.returncode
+        self.plugin = None
 
     def run_plugin(self):
         """Run a program which needs more complex setup steps as a sub-process.
@@ -169,20 +147,31 @@ class Quokka(object):
         except PluginException as msg:
             raise QuokkaException("Plugin initialization failed: %s" % msg)
 
-        plugin = plugin_class(self.conf)
+        self.plugin = plugin_class(self.conf.quokka)
         try:
-            plugin.start()
+            self.plugin.start()
         except PluginException as msg:
             raise QuokkaException(msg)
 
-        self.attach_monitors(plugin, self.conf.monitors)
+        self.attach_monitors(self.plugin, self.conf.monitors)
         self.attach_loggers(self.conf.loggers)
 
-        plugin.process.wait()
+        self.plugin.process.wait()
 
         self.detect_faults()
 
-        return plugin.process.returncode
+        return self.plugin.process.returncode
+
+    def stop_plugin(self):
+        """Stop a plugin by calling its stop function.
+        """
+        if not self.plugin.is_running():
+            logging.info("Plugin process exited prior with exit code: %d" % self.plugin.process.returncode)
+            return
+        try:
+            self.plugin.stop()
+        except PluginException as msg:
+            raise QuokkaException(msg)
 
     def attach_monitors(self, plugin, monitors):
         for monitor in monitors:
@@ -217,3 +206,14 @@ class Quokka(object):
             logger_class = ModuleImporter('core.loggers.' + logger_class).klass()
             logger = logger_class(**logger_kargs)
             self.loggers.append(logger)
+
+    def detect_faults(self):
+        """Observe each attached monitor for faults and add each fault to the attached loggers.
+        """
+        for monitor in self.monitors:
+            if monitor.detected_fault():
+                monitor_data = monitor.get_data()
+                for logger in self.loggers:
+                    logger.add_to_bucket(monitor_data)
+        for logger in self.loggers:
+            logger.add_fault()

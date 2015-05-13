@@ -13,21 +13,22 @@ from ..quokka import ExternalProcess, PluginException
 
 class FirefoxApplication(ExternalProcess):
 
-    def __init__(self, conf):
+    def __init__(self, quokka):
         super(FirefoxApplication, self).__init__()
-        self.quokka = conf.quokka
-        self.plugin = conf.plugin_kargs
+        self.quokka = quokka
+
         self.profile_path = ''
 
     def start(self):
-        binary = self.plugin['binary']
+        binary = self.quokka.plugin.kargs.get('binary')
         if not binary or not os.path.exists(binary):
             raise PluginException('%s not found.' % binary)
 
-        params = self.plugin['params']
-        environ = self.set_environ(self.quokka['environ'])
+        params = self.quokka.plugin.kargs.get('params', '')
 
-        prefs = self.plugin['prefs']
+        environ = self.set_environ(self.quokka.get('environ'))
+
+        prefs = self.quokka.plugin.kargs.get('prefs')
         if not prefs or not os.path.exists(prefs):
             raise PluginException('No preferences provided.')
 
@@ -37,12 +38,13 @@ class FirefoxApplication(ExternalProcess):
         self.call(cmd, environ)
         shutil.copyfile(prefs, os.path.join(self.profile_path, 'user.js'))
 
-        cmd = [binary, '-P', profile_name]
-        cmd.extend(shlex.split(params))
+        cmd = [binary, '-P', profile_name] + shlex.split(params)
+
         self.process = self.open(cmd, environ)
 
     def stop(self):
         if os.path.isdir(self.profile_path):
+            logging.info("Deleting Firefox profile path: %s" % self.profile_path)
             try:
                 shutil.rmtree(self.profile_path)
             except Exception as msg:

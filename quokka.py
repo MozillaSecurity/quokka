@@ -33,9 +33,7 @@ class QuokkaCommandLine(object):
 
         m = parser.add_argument_group('Mandatory Arguments')
         g = m.add_mutually_exclusive_group(required=True)
-        g.add_argument('-command', metavar='str', type=str, help='Run an application.')
-        g.add_argument('-plugin', metavar='file', type=argparse.FileType(),
-                       help='Run an application with a setup script.')
+        g.add_argument('-plugin', metavar='file', type=argparse.FileType(), help='Run an application.')
 
         o = parser.add_argument_group('Optional Arguments')
         o.add_argument('-quokka', metavar='file', type=argparse.FileType(), default=self.QUOKKA_CONFIG,
@@ -102,29 +100,24 @@ class QuokkaCommandLine(object):
 
         logging.debug(quokka_conf.quokka)
 
-        if args.command:
-            try:
-                quokka = Quokka(quokka_conf)
-                quokka.run_command(args.command)
-            except QuokkaException as msg:
-                logging.error(msg)
-                return 1
-            except KeyboardInterrupt:
-                print('')
-                logging.info("Caught SIGINT, aborting...")
-                return 0
-
         if args.plugin:
+            quokka = Quokka(quokka_conf)
             try:
-                quokka = Quokka(quokka_conf)
                 quokka.run_plugin()
             except QuokkaException as msg:
                 logging.error(msg)
                 return 1
             except KeyboardInterrupt:
                 print('')
-                logging.info("Caught SIGINT, aborting...")
+                logging.info("Caught SIGINT - Aborting.")
                 return 0
+            finally:
+                logging.info("Initiating plugin shutdown routines.")
+                try:
+                    quokka.stop_plugin()
+                except QuokkaException as msg:
+                    logging.error(msg)
+                    return 1
 
         return 0
 
