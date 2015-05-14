@@ -19,6 +19,7 @@ class FileLogger(Logger):
     def __init__(self, **kwargs):
         super(FileLogger, self).__init__()
         self.__dict__.update(kwargs)
+
         self.bucketpath = os.path.join(self.path, self.BUCKET_ID)
         self.faultspath = os.path.join(self.bucketpath, 'faults')
         if not self.bucketpath:

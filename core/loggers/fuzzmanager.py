@@ -23,9 +23,11 @@ from ..logger import Logger
 try:
     class FuzzManagerLogger(Logger):
         """FuzzManager Logger"""
+
         def __init__(self, **kwargs):
             super(FuzzManagerLogger, self).__init__()
             self.__dict__.update(kwargs)
+
             self.cache_dir = self.cache_dir or tempfile.gettempdir()
             self.server_host = self.server_host or "127.0.0.1"
             self.server_port = self.server_port or "8000"

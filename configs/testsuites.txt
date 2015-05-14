@@ -1,0 +1,3 @@
+https://www.khronos.org/registry/webgl/sdk/tests/webgl-conformance-tests.html?version=1.0.4&run=1
+https://www.khronos.org/registry/webgl/sdk/tests/webgl-conformance-tests.html?version=2.0.0&run=1
+https://github.com/w3c/web-platform-tests

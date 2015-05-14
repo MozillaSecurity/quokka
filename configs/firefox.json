@@ -2,12 +2,12 @@
   "plugin": {
     "class": "firefox.FirefoxApplication",
     "kargs": {
-      "binary": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
+      "binary": "/Users/cdiehl/Documents/repos/mozilla/mozilla-inbound/obj-ff64-asan-opt/dist/NightlyDebug.app/Contents/MacOS/firefox",
       "params": "-no-remote -height 512 -width 512 @params@",
       "prefs": "/Users/cdiehl/Dropbox/Projects/peach/peach/Resources/Settings/Firefox/prefs.js"
     }
   },
   "environ": {
-    "DYLD_LIBRARY_PATH": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
+    "DYLD_LIBRARY_PATH": "/Users/cdiehl/Documents/repos/mozilla/mozilla-inbound/obj-ff64-asan-opt/dist/NightlyDebug.app/Contents/MacOS/"
   }
 }

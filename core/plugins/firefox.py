@@ -36,8 +36,9 @@ class FirefoxApplication(ExternalProcess):
         profile_name = os.path.basename(self.profile_path)
         cmd = [binary, '-no-remote', '-CreateProfile', '%s %s' % (profile_name, self.profile_path)]
         self.call(cmd, environ)
-        shutil.copyfile(prefs, os.path.join(self.profile_path, 'user.js'))
 
+        shutil.copyfile(prefs, os.path.join(self.profile_path, 'prefs.js'))
+        print(prefs)
         cmd = [binary, '-P', profile_name] + shlex.split(params)
 
         self.process = self.open(cmd, environ)

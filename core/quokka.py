@@ -141,6 +141,8 @@ class Quokka(object):
 
     def run_plugin(self):
         """Run a program which needs more complex setup steps as a sub-process.
+
+        :return: The exit code of the target process.
         """
         try:
             plugin_class = ModuleImporter('core.plugins.' + self.conf.plugin_class).klass()
@@ -163,8 +165,13 @@ class Quokka(object):
         return self.plugin.process.returncode
 
     def stop_plugin(self):
-        """Stop a plugin by calling its stop function.
+        """Initiate a plugin's shutdown routines by calling its stop function.
+
+        :return: None
         """
+        if not self.plugin:
+            logging.info("Plugin did not start.")
+            return
         if not self.plugin.is_running():
             logging.info("Plugin process exited prior with exit code: %d" % self.plugin.process.returncode)
             return
@@ -174,6 +181,12 @@ class Quokka(object):
             raise QuokkaException(msg)
 
     def attach_monitors(self, plugin, monitors):
+        """Attach a list of monitors and listeners to observe the target process for faults.
+
+        :param plugin: Plugin instance
+        :param monitors: List of monitors
+        :return: None
+        """
         for monitor in monitors:
             monitor_class = monitor.get("class")
             monitor_kargs = monitor.get("kargs")
@@ -185,7 +198,7 @@ class Quokka(object):
             elif monitor_class.MONITOR_NAME == "WebSocketMonitor":
                 pass
             else:
-                logging.warning("Dropping %s" % monitor_class)
+                logging.warning("Unsupported monitor: %s" % monitor_class)
                 continue
             for listener in monitor_listeners:
                 listener_class = listener.get("class")
@@ -199,6 +212,11 @@ class Quokka(object):
             self.monitors.append(monitor_instance)
 
     def attach_loggers(self, loggers):
+        """Attach a list of loggers to bucket by the monitors found faults.
+
+        :param loggers: A list of loggers
+        :return: None
+        """
         for logger in loggers:
             logger_class = logger.get("class")
             logger_kargs = logger.get("kargs")
@@ -209,6 +227,8 @@ class Quokka(object):
 
     def detect_faults(self):
         """Observe each attached monitor for faults and add each fault to the attached loggers.
+
+        :return: None
         """
         for monitor in self.monitors:
             if monitor.detected_fault():

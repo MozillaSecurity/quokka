@@ -1,0 +1,12 @@
+{
+  "plugin": {
+    "class": "command.ConsoleApplication",
+    "kargs": {
+      "binary": "/Users/cdiehl/Documents/repos/chromium/asan-mac-release-328075/Chromium.app/Contents/MacOS/Chromium",
+      "params": "--enable-logging=stderr --log-level=0 --js-flags='--expose_gc' --allow-file-access-from-files --user-data-dir=/tmp/chromium --window-size=512,512 --disable-popup-blocking --ignore-certificate-errors --enable-experimental-canvas-features --enable-web-midi --enable-spdy4a2 --enable-opus-playback --enable-vp8-alpha-playback --enable-experimental-web-platform-features --enable-deferred-image-decoding --enable-usermedia-screen-capture --enable-webgl-draft-extensions --enable-video-track --single-process --no-sandbox --disable-seccomp-filter-sandbox --disable-seccomp-sandbox --crash-on-hang-seconds=60 --crash-on-hang-threads=60 @params@"
+    }
+  },
+  "environ": {
+    "DYLD_LIBRARY_PATH": "/Users/cdiehl/Documents/repos/chromium/asan-mac-release-328075/Chromium.app/Contents/MacOS"
+  }
+}
