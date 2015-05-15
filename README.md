@@ -1,6 +1,8 @@
 Quokka
 ======
 
+Quokka is a utility to launch and monitor application for faults. This includes testcase verification, monitoring of unittests and testsuites or using it as harness for fuzzers like Dharma. It can also be used as a harness for fuzzers i.e Dharma.
+
 <h3>Requirements</h3>
 ---
 None
@@ -42,7 +44,8 @@ Quokka comes with a command.json configuration, in order execute simple programs
 
 There are two types of configurations. The main Quokka configuration and a plugin configuration. The Quokka configuration is the main configuration which is used to define default values.
 
-Example: quokka.conf
+
+**Example: quokka.conf**
 
 ```
 {
@@ -77,7 +80,7 @@ Example: quokka.conf
 }
 ```
 
-Example: plugin.conf
+**Example: plugin.conf**
 
 ```
 {

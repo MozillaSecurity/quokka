@@ -140,7 +140,7 @@ class Quokka(object):
         self.plugin = None
 
     def run_plugin(self):
-        """Run a program which needs more complex setup steps as a sub-process.
+        """Run a program which needs complex setup steps.
 
         :return: The exit code of the target process.
         """
