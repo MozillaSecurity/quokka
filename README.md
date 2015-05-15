@@ -1,7 +1,7 @@
 Quokka
 ======
 
-Quokka is a utility to launch and monitor application for faults. This includes testcase verification, monitoring of unittests and testsuites or using it as harness for fuzzers like Dharma. It can also be used as a harness for fuzzers i.e Dharma.
+Quokka is a utility to launch and monitor application for faults. This includes testcase verification, monitoring of unittests and testsuites or using it as harness for fuzzers like Dharma. 
 
 <h3>Requirements</h3>
 ---
