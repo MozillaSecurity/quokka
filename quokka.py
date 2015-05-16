@@ -11,7 +11,7 @@ import sys
 import logging
 import argparse
 
-from core.quokka import Quokka, Utilities, QuokkaException
+from core.quokka import Quokka, QuokkaException
 from core.config import QuokkaConf
 
 
@@ -48,6 +48,10 @@ class QuokkaCommandLine(object):
 
         return parser.parse_args()
 
+    @staticmethod
+    def pair_to_dict(args):
+        return dict(kv.split('=', 1) for kv in args)
+
     def main(self):
         args = self.parse_args()
 
@@ -74,7 +78,7 @@ class QuokkaCommandLine(object):
         try:
             quokka_conf = args.quokka.read()
             if args.conf_vars:
-                quokka_conf = QuokkaConf.set_conf_vars(quokka_conf, Utilities.pair_to_dict(args.conf_vars))
+                quokka_conf = QuokkaConf.set_conf_vars(quokka_conf, self.pair_to_dict(args.conf_vars))
             quokka_conf = QuokkaConf(quokka_conf)
         except QuokkaException as msg:
             logging.error(msg)
@@ -85,14 +89,14 @@ class QuokkaCommandLine(object):
             try:
                 plugin_conf = args.plugin.read()
                 if args.conf_vars:
-                    plugin_conf = QuokkaConf.set_conf_vars(plugin_conf, Utilities.pair_to_dict(args.conf_vars))
+                    plugin_conf = QuokkaConf.set_conf_vars(plugin_conf, self.pair_to_dict(args.conf_vars))
                 quokka_conf.add_plugin_conf(plugin_conf)
             except QuokkaException as msg:
                 logging.error(msg)
                 return 1
 
         if args.conf_args:
-            conf_args = Utilities.pair_to_dict(args.conf_args)
+            conf_args = self.pair_to_dict(args.conf_args)
             logging.info('Updating configuration with: %r' % conf_args)
             for k, v in conf_args.items():
                 if k in quokka_conf.quokka:

@@ -6,10 +6,10 @@ import os
 import shlex
 import logging
 
-from ..quokka import ExternalProcess, PluginException
+from ..plugin import PluginProcess, PluginException
 
 
-class ConsoleApplication(ExternalProcess):
+class ConsoleApplication(PluginProcess):
 
     def __init__(self, quokka):
         super(ConsoleApplication, self).__init__()

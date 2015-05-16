@@ -8,10 +8,10 @@ import shutil
 import logging
 import tempfile
 
-from ..quokka import ExternalProcess, PluginException
+from ..plugin import PluginProcess, PluginException
 
 
-class FirefoxApplication(ExternalProcess):
+class FirefoxApplication(PluginProcess):
 
     def __init__(self, quokka):
         super(FirefoxApplication, self).__init__()

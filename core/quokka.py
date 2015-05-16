@@ -2,11 +2,9 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-import os
-import sys
-import time
 import logging
-import subprocess
+
+from .plugin import PluginException
 
 
 class QuokkaException(Exception):
@@ -16,121 +14,9 @@ class QuokkaException(Exception):
     pass
 
 
-class PluginException(Exception):
-    """
-    Unrecoverable error in external process.
-    """
-    pass
-
-
-class BasePlugin(object):
-    """
-    An abstract class for providing base methods and properties to plugins.
-    """
-
-    @classmethod
-    def name(cls):
-        return getattr(cls, 'PLUGIN_NAME', cls.__name__)
-
-    @classmethod
-    def version(cls):
-        return getattr(cls, 'PLUGIN_VERSION', '0.1')
-
-    def open(self, *args):
-        pass
-
-    def stop(self):
-        pass
-
-
-class ModuleImporter(object):
-    def __init__(self, module_path):
-        self.class_name = module_path.split(".")[-1]
-        self.module_path = ".".join(module_path.split(".")[:-1])
-
-    def klass(self):
-        logging.debug("Importing '%s' from '%s'" % (self.class_name, self.module_path))
-        module = __import__(self.module_path, fromlist=[""])
-        return getattr(module, self.class_name)
-
-
-class ExternalProcess(BasePlugin):
-    """
-    Parent class for plugins which make use of external tools.
-    """
-
-    def __init__(self):
-        self.process = None
-
-    def open(self, cmd, env=None, cwd=None):
-        logging.info('Running command: {}'.format(cmd))
-        self.process = subprocess.Popen(cmd,
-                                        universal_newlines=True,
-                                        env=env or os.environ,
-                                        cwd=cwd,
-                                        stderr=subprocess.STDOUT,
-                                        stdout=subprocess.PIPE,
-                                        bufsize=1,
-                                        close_fds='posix' in sys.builtin_module_names)
-        return self.process
-
-    @staticmethod
-    def call(cmd, env=None, cwd=None):
-        logging.info('Calling command: {}'.format(cmd))
-        return subprocess.check_call(cmd, env=env, cwd=cwd)
-
-    def wait(self, timeout=600):
-        if timeout:
-            end_time = time.time() + timeout
-            interval = min(timeout / 1000.0, .25)
-            while True:
-                result = self.process.poll()
-                if result is not None:
-                    return result
-                if time.time() >= end_time:
-                    break
-                time.sleep(interval)
-            self.stop()
-        self.process.wait()
-
-    @staticmethod
-    def set_environ(context=None):
-        env = os.environ
-        if context is None:
-            return env
-        for key, val in context.items():
-            if isinstance(val, dict):
-                env[key] = ','.join('{!s}={!r}'.format(k, v) for (k, v) in val.items())
-            else:
-                env[key] = val
-        return env
-
-    def is_running(self):
-        if self.process is None:
-            return False
-        if self.process.poll() is not None:
-            return False
-        return True
-
-    def stop(self):
-        if self.process:
-            try:
-                self.process.terminate()
-                self.process.kill()
-            except Exception as e:
-                logging.error(e)
-
-
-class Utilities(object):
-
-    @staticmethod
-    def pair_to_dict(args):
-        return dict(kv.split('=', 1) for kv in args)
-
-
 class Quokka(object):
     """
-    Quokka.
+    Quokka observer class.
     """
 
     def __init__(self, conf):
@@ -139,13 +25,31 @@ class Quokka(object):
         self.loggers = []
         self.plugin = None
 
+    @staticmethod
+    def import_plugin_class(module_path):
+        """Import a plugin class.
+
+        :param module_path: Path to Python class
+        :return: Class object
+        """
+        module_path, class_name = module_path.rsplit(".", 1)
+        logging.debug("Importing '%s' from '%s'" % (class_name, module_path))
+        try:
+            module = __import__(module_path, fromlist=[""])
+        except ImportError as msg:
+            raise PluginException(msg)
+        try:
+            return getattr(module, class_name)
+        except AttributeError as msg:
+            raise PluginException(msg)
+
     def run_plugin(self):
         """Run a program which needs complex setup steps.
 
-        :return: The exit code of the target process.
+        :return: Exit code of the target process.
         """
         try:
-            plugin_class = ModuleImporter('core.plugins.' + self.conf.plugin_class).klass()
+            plugin_class = self.import_plugin_class('core.plugins.' + self.conf.plugin_class)
         except PluginException as msg:
             raise QuokkaException("Plugin initialization failed: %s" % msg)
 
@@ -192,7 +96,7 @@ class Quokka(object):
             monitor_kargs = monitor.get("kargs")
             monitor_listeners = monitor.get("listeners")
             logging.info("Attaching monitor '%s'" % monitor_class)
-            monitor_class = ModuleImporter('core.monitors.' + monitor_class).klass()
+            monitor_class = self.import_plugin_class('core.monitors.' + monitor_class)
             if monitor_class.MONITOR_NAME == "ConsoleMonitor":
                 monitor_instance = monitor_class(plugin.process, *monitor_kargs)
             elif monitor_class.MONITOR_NAME == "WebSocketMonitor":
@@ -204,7 +108,7 @@ class Quokka(object):
                 listener_class = listener.get("class")
                 listener_kargs = listener.get("kargs")
                 logging.info("Attaching listener '%s'" % listener_class)
-                listener_class = ModuleImporter('core.listeners.' + listener_class).klass()
+                listener_class = self.import_plugin_class('core.listeners.' + listener_class)
                 listener_instance = listener_class(*listener_kargs)
                 monitor_instance.add_listener(listener_instance)
             monitor_instance.daemon = True
@@ -221,7 +125,7 @@ class Quokka(object):
             logger_class = logger.get("class")
             logger_kargs = logger.get("kargs")
             logging.info("Attaching logger '%s'" % logger_class)
-            logger_class = ModuleImporter('core.loggers.' + logger_class).klass()
+            logger_class = self.import_plugin_class('core.loggers.' + logger_class)
             logger = logger_class(**logger_kargs)
             self.loggers.append(logger)
 
