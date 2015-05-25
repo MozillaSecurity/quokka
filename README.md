@@ -1,6 +1,9 @@
 Quokka
 ======
 
+![](http://people.mozilla.com/~cdiehl/img/quokka.png)
+
+
 Quokka is a utility to launch and monitor application for faults. This includes testcase verification, monitoring of unittests and testsuites or using it as harness for fuzzers like Dharma. 
 
 <h3>Requirements</h3>
