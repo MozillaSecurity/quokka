@@ -1,6 +1,3 @@
-Quokka
-======
-
 ![](http://people.mozilla.com/~cdiehl/img/quokka.png)
 
 
