@@ -1,0 +1,12 @@
+{
+  "plugin": {
+    "class": "firefox.FirefoxApplication",
+    "kargs": {
+      "binary": "/home/ubuntu/firefox/firefox",
+      "params": "-no-remote -height 512 -width 512 @params@",
+      "prefs": "/home/ubuntu/peach/Resources/Settings/Firefox/prefs.js"
+    }
+  },
+  "environ": {
+  }
+}
