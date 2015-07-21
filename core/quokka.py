@@ -116,7 +116,7 @@ class Quokka(object):
             self.monitors.append(monitor_instance)
 
     def attach_loggers(self, loggers):
-        """Attach a list of loggers to bucket by the monitors found faults.
+        """Attach a list of loggers to bucket the monitors found faults.
 
         :param loggers: A list of loggers
         :return: None

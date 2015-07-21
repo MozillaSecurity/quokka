@@ -15,6 +15,12 @@
       "kargs": {
         "path": "/srv/logs"
       }
+    },
+    {
+      "class": "fuzzmanager.FuzzManager",
+      "kargs": {
+        "binary": ""
+      }
     }
   ],
   "monitors": [
