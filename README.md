@@ -1,4 +1,4 @@
-![](http://people.mozilla.com/~cdiehl/img/quokka.png)
+![Logo](https://github.com/posidron/posidron.github.io/raw/master/static/images/quokka.png)
 
 
 Quokka is a utility to launch and monitor application for faults. This includes testcase verification, monitoring of unittests and testsuites or using it as harness for fuzzers like Dharma. 
